@@ -1,34 +1,27 @@
-﻿
-using LearningUnitTest.Models;
-using System.Reflection.Metadata.Ecma335;
+﻿using LearningUnitTest.Models;
 
 namespace LearningUnitTest.Services;
 
 public class UserService
 {
-    private readonly List<User> _users = [];
+    private readonly List<User> _users = new();
 
     public User RegisterUser(string name, string email)
     {
-        // Validate name
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Name is required.");
 
-
-        // Validate email
-        if (string.IsNullOrWhiteSpace(email) || !email.Contains('@'))
+        if (string.IsNullOrWhiteSpace(email))
             throw new ArgumentException("Email is required.");
-
 
         if (!email.Contains('@'))
             throw new ArgumentException("Invalid email address.");
-        
-        // Check duplicate email
-        bool emailExists = _users.Any(
-            u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
 
-        if (emailExists)
+        if (_users.Any(x =>
+            x.Email.Equals(email, StringComparison.OrdinalIgnoreCase)))
+        {
             throw new InvalidOperationException("Email already exists.");
+        }
 
         var user = new User
         {

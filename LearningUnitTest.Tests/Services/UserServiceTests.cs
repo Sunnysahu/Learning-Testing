@@ -145,8 +145,7 @@ public class UserServiceTests
 
         var result = _userService.RegisterUser(name, email);
 
-        Assert.NotNull(result);
-        Assert.Equal("ALIAS@GMAIL.COM", result.Email);
+        Assert.Throws<InvalidOperationException>(() => _userService.RegisterUser("Alias", "ALIAS@GMAIL.COM"));
     }
 
 }
