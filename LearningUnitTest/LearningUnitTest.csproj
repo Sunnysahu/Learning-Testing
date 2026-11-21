@@ -6,8 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="Examples\03-Moq\" />
-  </ItemGroup>
-
 </Project>
