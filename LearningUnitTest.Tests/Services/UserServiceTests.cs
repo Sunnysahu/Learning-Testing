@@ -92,4 +92,61 @@ public class UserServiceTests
 
         Assert.Equal(2, result.Count);
     }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void RegisterUser_ShouldThrowException_WhenNameIsInvalid(string? name)
+    {
+        // Arrange
+        string email = "sunny@gmail.com";
+
+        // Act & Assert
+        Assert.Throws<ArgumentException>(() => _userService.RegisterUser(name!, email));
+    }
+
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void RegisterUser_ShouldThrowException_ForNullOrWhitespaceEmail(string? email)
+    {
+        // Arrange
+        string name = "Sunny";
+
+        // Act & Assert
+        Assert.Throws<ArgumentException>(() => _userService.RegisterUser(name, email!));
+    }
+
+    [Fact]
+    public void RegisterUser_ShouldReturnDefferentUserIdForTwoDifferentUsers()
+    {
+        var user1 = _userService.RegisterUser("sunny","sunny@gmail.com");
+        var user2 = _userService.RegisterUser("sahu", "sahu@gmail.com");
+
+        Assert.Equal(1, user1.Id);
+        Assert.Equal(2, user2.Id);
+        Assert.NotEqual(user1.Id, user2.Id);
+    }
+
+    [Theory, InlineData(" "), InlineData("   "), InlineData("\t")]
+    public void RegisterUser_ShouldThrowException_ForWhitespaceName(string? name) 
+        => Assert.Throws<ArgumentException>(() =>_userService.RegisterUser(name!, "alias@gmail.com"));
+    
+
+    [Fact]
+    public void RegisterUser_ShouldThrowException_RegestringEmailWithUppercaseIfUserNotRegistered()
+    {
+
+        string name = "Alias";
+        string email = "ALIAS@GMAIL.COM";
+
+        var result = _userService.RegisterUser(name, email);
+
+        Assert.NotNull(result);
+        Assert.Equal("ALIAS@GMAIL.COM", result.Email);
+    }
+
 }
