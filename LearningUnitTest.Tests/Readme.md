@@ -377,3 +377,86 @@ The most commonly used methods are:
 | `It.Is<T>()` | Matches values satisfying a condition |
 | `It.IsIn<T>()` | Matches values from a specified collection |
 | `It.IsNotIn<T>()` | Matches values outside a specified collection |
+
+
+# Callback() in Moq
+
+### What is Callback()?
+
+`Callback()` is a method provided by the Moq framework. It lets us execute our own custom code when a mocked method is called.
+
+We commonly use `Callback()` to:
+- Capture method arguments.
+- Store values passed to a mocked method.
+- Execute custom logic when a method is called.
+- Track whether a method was called and with which values.
+
+### Syntax
+
+```csharp
+mock.Setup(x => x.Save(It.IsAny<string>()))
+    .Callback<string>(value =>
+    {
+        // Execute custom code here
+    });
+```
+
+### Example
+
+```csharp
+public interface IUserService
+{
+    void SaveUser(string name);
+}
+```
+
+**Unit Test:**
+
+```csharp
+[Fact]
+public void SaveUser_ShouldCaptureUserName()
+{
+    // Arrange
+    var mock = new Mock<IUserService>();
+
+    string capturedName = null;
+
+    mock.Setup(x => x.SaveUser(It.IsAny<string>()))
+        .Callback<string>(name =>
+        {
+            capturedName = name;
+        });
+
+    // Act
+    mock.Object.SaveUser("John");
+
+    // Assert
+    Assert.Equal("John", capturedName);
+}
+```
+
+### Explanation
+
+1. `Setup()` configures the mocked method.
+2. `It.IsAny<string>()` accepts any string argument.
+3. `Callback<string>()` executes custom code when the method is called.
+4. `name` receives the argument passed to `SaveUser()`.
+5. `capturedName = name` stores the received value.
+6. `Assert.Equal()` verifies that the expected value was captured.
+
+### Important Point
+
+`Callback()` does not define the return value of a mocked method. It executes custom code when the configured method is called.
+
+Use `Returns()` when you want to specify a return value.
+
+### Difference Between Returns() and Callback()
+
+| Method | Purpose |
+|---|---|
+| `Returns()` | Specifies the return value of a mocked method. |
+| `Callback()` | Executes custom code when a mocked method is called. |
+
+**Remember:**
+
+`Callback()` = Execute our own code when a mocked method is called.
