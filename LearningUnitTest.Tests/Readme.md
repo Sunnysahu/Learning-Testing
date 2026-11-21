@@ -460,3 +460,134 @@ Use `Returns()` when you want to specify a return value.
 **Remember:**
 
 `Callback()` = Execute our own code when a mocked method is called.
+
+
+# SetupSequence() in Moq
+
+## 1. What is SetupSequence()?
+
+`SetupSequence()` is a method provided by the Moq framework.
+
+It allows us to configure a mocked method to return different values or throw different exceptions on successive calls.
+
+In simple words:
+
+**SetupSequence() lets us define a sequence of behaviors for a mocked method whenever it is called multiple times.**
+
+## 2. Syntax
+
+```csharp
+mock.SetupSequence(x => x.GetStatus())
+    .Returns("Pending")
+    .Returns("Processing")
+    .Returns("Completed");
+```
+
+In this example:
+- First call returns `"Pending"`.
+- Second call returns `"Processing"`.
+- Third call returns `"Completed"`.
+
+## 3. Practical Example
+
+### Interface
+
+```csharp
+public interface IOrderService
+{
+    string GetOrderStatus();
+}
+```
+
+### Unit Test Using xUnit and Moq
+
+```csharp
+[Fact]
+public void GetOrderStatus_ShouldReturnDifferentStatuses()
+{
+    // Arrange
+    var mock = new Mock<IOrderService>();
+
+    mock.SetupSequence(x => x.GetOrderStatus())
+        .Returns("Pending")
+        .Returns("Processing")
+        .Returns("Completed");
+
+    // Act
+    var firstCall = mock.Object.GetOrderStatus();
+    var secondCall = mock.Object.GetOrderStatus();
+    var thirdCall = mock.Object.GetOrderStatus();
+
+    // Assert
+    Assert.Equal("Pending", firstCall);
+    Assert.Equal("Processing", secondCall);
+    Assert.Equal("Completed", thirdCall);
+}
+```
+
+## 4. SetupSequence() with Exceptions
+
+We can also configure a mocked method to throw an exception during a particular call.
+
+```csharp
+mock.SetupSequence(x => x.GetOrderStatus())
+    .Returns("Pending")
+    .Throws(new Exception("Something went wrong"))
+    .Returns("Completed");
+```
+
+In this example:
+- First call returns `"Pending"`.
+- Second call throws an exception.
+- Third call returns `"Completed"`.
+
+## 5. Difference Between Setup() and SetupSequence()
+
+| Setup() | SetupSequence() |
+|---|---|
+| Configures a mocked method with a behavior. | Configures multiple successive behaviors. |
+| Generally returns the configured value on every call. | Returns different configured values on successive calls. |
+| Useful for a single consistent behavior. | Useful for testing changing behavior across multiple calls. |
+
+### Example: Setup()
+
+```csharp
+mock.Setup(x => x.GetOrderStatus())
+    .Returns("Pending");
+```
+
+Every call returns `"Pending"`.
+
+### Example: SetupSequence()
+
+```csharp
+mock.SetupSequence(x => x.GetOrderStatus())
+    .Returns("Pending")
+    .Returns("Processing")
+    .Returns("Completed");
+```
+
+Each successive call returns the next configured value.
+
+## 6. When Should We Use SetupSequence()?
+
+Use `SetupSequence()` when you want to test:
+
+- Retry mechanisms.
+- API calls that return different responses.
+- Changing order or payment statuses.
+- Temporary failures followed by successful responses.
+- Methods that behave differently on successive calls.
+
+## 7. Important Points to Remember
+
+- `SetupSequence()` belongs to Moq, not xUnit.
+- It configures different behaviors for successive method calls.
+- It supports both `Returns()` and `Throws()`.
+- It is particularly useful when testing retry logic and multiple execution scenarios.
+
+**Remember:**
+
+`Setup()` = Configure a consistent behavior.
+
+`SetupSequence()` = Configure different behaviors for successive calls.
