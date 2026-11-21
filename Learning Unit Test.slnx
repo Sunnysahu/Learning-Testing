@@ -1,1 +1,4 @@
-<Solution />
+<Solution>
+  <Project Path="LearningUnitTest.Tests/LearningUnitTest.Tests.csproj" Id="9f1c628f-9f5d-484d-a523-f9b0ae0cb2c8" />
+  <Project Path="LearningUnitTest/LearningUnitTest.csproj" Id="011a1879-ffb0-488a-b315-fbe0bd45ad40" />
+</Solution>
