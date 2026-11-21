@@ -1,5 +1,5 @@
 
-## 2. What is Unit Testing?
+## What is Unit Testing?
 
 Unit testing means testing a small piece of code independently to verify that it produces the expected result.
 
