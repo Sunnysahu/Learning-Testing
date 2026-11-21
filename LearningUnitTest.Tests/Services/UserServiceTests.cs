@@ -1,5 +1,4 @@
-﻿
-using LearningUnitTest.Services;
+﻿using LearningUnitTest.Services;
 
 namespace LearningUnitTest.Tests.Services;
 
