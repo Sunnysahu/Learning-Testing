@@ -92,7 +92,7 @@ xUnit executes the same test method three times, once for each `[InlineData]`.
 - `[Fact]` = Single test scenario.
 - `[Theory]` = Multiple test scenarios using different data.
 
----------------------------------------------------------------------
+---
 
 # Unit Testing with Moq – Mocking
 
@@ -225,6 +225,7 @@ We verified:
 
 With Moq, we can simulate database responses, control dependency behavior, and verify interactions without requiring an actual database connection.
 
+---
 # What is `It` in xUnit Testing?
 
 ## 1. Introduction
@@ -378,6 +379,7 @@ The most commonly used methods are:
 | `It.IsIn<T>()` | Matches values from a specified collection |
 | `It.IsNotIn<T>()` | Matches values outside a specified collection |
 
+---
 
 # Callback() in Moq
 
@@ -461,7 +463,7 @@ Use `Returns()` when you want to specify a return value.
 
 `Callback()` = Execute our own code when a mocked method is called.
 
-
+---
 # SetupSequence() in Moq
 
 ## 1. What is SetupSequence()?
@@ -591,3 +593,191 @@ Use `SetupSequence()` when you want to test:
 `Setup()` = Configure a consistent behavior.
 
 `SetupSequence()` = Configure different behaviors for successive calls.
+
+
+---
+
+# Async Moq — ReturnsAsync() and ThrowsAsync()
+
+## 1. What is Async Moq?
+
+When working with asynchronous methods in C#, we commonly use `async` and `await` with methods that return `Task` or `Task<T>`.
+
+In unit testing, Moq provides methods such as:
+
+- `ReturnsAsync()` – Configures a mocked asynchronous method to return a successful result.
+- `ThrowsAsync()` – Configures a mocked asynchronous method to throw an exception.
+
+These methods are useful when testing asynchronous code using xUnit and Moq.
+
+## 2. ReturnsAsync()
+
+### What is ReturnsAsync()?
+
+`ReturnsAsync()` is a Moq method used to configure a mocked asynchronous method to return a specific result wrapped in a completed `Task`.
+
+In simple words:
+
+**ReturnsAsync() lets us specify what value an asynchronous mocked method should return.**
+
+### Example
+
+**Interface:**
+
+```csharp
+public interface IUserService
+{
+    Task<User> GetUserAsync(int id);
+}
+```
+
+**User Class:**
+
+```csharp
+public class User
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+}
+```
+
+**Unit Test:**
+
+```csharp
+[Fact]
+public async Task GetUserAsync_ShouldReturnUser()
+{
+    // Arrange
+    var mock = new Mock<IUserService>();
+
+    mock.Setup(x => x.GetUserAsync(It.IsAny<int>()))
+        .ReturnsAsync(new User
+        {
+            Id = 1,
+            Name = "John"
+        });
+
+    // Act
+    var result = await mock.Object.GetUserAsync(1);
+
+    // Assert
+    Assert.NotNull(result);
+    Assert.Equal("John", result.Name);
+}
+```
+
+### Explanation
+
+1. `Setup()` configures the mocked asynchronous method.
+2. `It.IsAny<int>()` accepts any integer argument.
+3. `ReturnsAsync()` specifies the result returned by the asynchronous method.
+4. `await` waits for the asynchronous operation to complete.
+5. `Assert.Equal()` verifies the expected result.
+
+## 3. ThrowsAsync()
+
+### What is ThrowsAsync()?
+
+`ThrowsAsync()` is a Moq method used to configure a mocked asynchronous method to throw an exception when it is awaited.
+
+In simple words:
+
+**ThrowsAsync() lets us simulate an exception from an asynchronous mocked method.**
+
+### Example
+
+```csharp
+[Fact]
+public async Task GetUserAsync_ShouldThrowException()
+{
+    // Arrange
+    var mock = new Mock<IUserService>();
+
+    mock.Setup(x => x.GetUserAsync(It.IsAny<int>()))
+        .ThrowsAsync(new Exception("User not found"));
+
+    // Act & Assert
+    var exception = await Assert.ThrowsAsync<Exception>(
+        () => mock.Object.GetUserAsync(1)
+    );
+
+    Assert.Equal("User not found", exception.Message);
+}
+```
+
+### Explanation
+
+1. `Setup()` configures the mocked method.
+2. `It.IsAny<int>()` accepts any integer argument.
+3. `ThrowsAsync()` configures the mocked method to throw an exception.
+4. `Assert.ThrowsAsync()` verifies that the expected exception is thrown.
+5. `Assert.Equal()` checks the exception message.
+
+## 4. Difference Between ReturnsAsync() and ThrowsAsync()
+
+| ReturnsAsync() | ThrowsAsync() |
+|---|---|
+| Returns a successful asynchronous result. | Throws an asynchronous exception. |
+| Used to test successful scenarios. | Used to test failure scenarios. |
+| Simulates successful API or database responses. | Simulates API or database failures. |
+
+## 5. Real-World Example: API Success and Failure
+
+Suppose we have an API that retrieves user information.
+
+### Successful Scenario
+
+```csharp
+mock.Setup(x => x.GetUserAsync(1))
+    .ReturnsAsync(new User
+    {
+        Id = 1,
+        Name = "John"
+    });
+```
+
+The mocked API returns user information successfully.
+
+### Failure Scenario
+
+```csharp
+mock.Setup(x => x.GetUserAsync(1))
+    .ThrowsAsync(new Exception("API is unavailable"));
+```
+
+The mocked API throws an exception.
+
+## 6. Difference Between Returns() and ReturnsAsync()
+
+| Returns() | ReturnsAsync() |
+|---|---|
+| Used for synchronous methods. | Used for asynchronous methods. |
+| Returns a direct value. | Returns a value wrapped in a completed Task. |
+| Example: `string` | Example: `Task<string>` |
+
+### Returns() Example
+
+```csharp
+mock.Setup(x => x.GetName())
+    .Returns("John");
+```
+
+### ReturnsAsync() Example
+
+```csharp
+mock.Setup(x => x.GetNameAsync())
+    .ReturnsAsync("John");
+```
+
+## 7. Important Points to Remember
+
+- `ReturnsAsync()` and `ThrowsAsync()` belong to Moq, not xUnit.
+- `ReturnsAsync()` is used to simulate successful asynchronous operations.
+- `ThrowsAsync()` is used to simulate failed asynchronous operations.
+- Use `await` when calling asynchronous methods in your tests.
+- Use `Assert.ThrowsAsync()` to verify exceptions from asynchronous methods.
+
+**Remember:**
+
+- `ReturnsAsync()` = Return an asynchronous result.
+- `ThrowsAsync()` = Throw an exception from an asynchronous operation.
